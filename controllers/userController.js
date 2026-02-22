@@ -55,3 +55,29 @@ module.exports.login = async (req, res, next) => {
         next(ex);
     }
 };
+
+// Xử lý chức năng cập nhật Avatar cho người dùng
+module.exports.setAvatar = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const avatarImage = req.body.image;
+
+        // Tìm user theo ID và cập nhật ảnh
+        const userData = await User.findByIdAndUpdate(
+            userId,
+            {
+                isAvatarImageSet: true,
+                avatarImage,
+            },
+            { 
+                new: true
+            }
+        );
+        return res.json({
+            isSet: userData.isAvatarImageSet,
+            image: userData.avatarImage,
+        });
+    } catch (ex) {
+        next(ex);
+    }
+};

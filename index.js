@@ -4,7 +4,9 @@ const cors = require('cors');
 const http = require('http'); //Cần thiết để tích hợp socket.io
 const { Server } = require("socket.io");
 require("dotenv").config(); // <--- Thêm dòng này để đọc file .env
+
 const authRouter = require("./routes/auth"); // Import auth routes
+const userAvatarRoutes = require("./routes/userAvatarRoutes"); // Import avatar routes
 
 const app = express();
 const server = http.createServer(app); // Tạo server bọc lấy app express
@@ -13,6 +15,7 @@ const server = http.createServer(app); // Tạo server bọc lấy app express
 app.use(cors());
 app.use(express.json()); // Để server đọc được dữ liệu JSON gửi lên
 app.use("/api/auth", authRouter);
+app.use("/api/userAvatar", userAvatarRoutes);
 
 // Lấy URL từ biến môi trường
 const MONGODB_URL = process.env.MONGODB_URL;
