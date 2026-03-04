@@ -13,7 +13,8 @@ const server = http.createServer(app); // Tạo server bọc lấy app express
 
 // Cấu hình Middleware
 app.use(cors());
-app.use(express.json()); // Để server đọc được dữ liệu JSON gửi lên
+app.use(express.json({ limit: '50mb' })); // Để server đọc được dữ liệu JSON gửi lên
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/userAvatar", userAvatarRoutes);
 
