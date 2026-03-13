@@ -81,3 +81,39 @@ module.exports.setAvatar = async (req, res, next) => {
         next(ex);
     }
 };
+
+// End point cho chức năng tìm kiếm
+module.exports.searchUsers = async (req, res, next) => {
+    try {
+        const keyword = req.query.username; // Lấy từ khóa người dùng gõ
+        const currentUserId = req.query.currentUserId; // ID của người đang đăng nhập
+
+        if(!keyword){
+            return res.json({
+                status: false,
+                message: "Vui lòng nhập từ khóa",
+            });
+        }
+        // Tìm kiếm trong MongoDB
+        // $regex: Tìm các user có username chứa từ khóa
+        // $options: "i" (Không phân biệt chữ hoa chữ thường)
+        // $ne (Not Equal): Loại trừ ID của người đang tìm kiếm ra khỏi kết quả
+        const users = await User.find({
+            _id: { $ne: currentUserId},
+            username: { $regex: keyword, $options: "i"},
+        }).select([
+            "username",
+            "avatarImage",
+            "_id",
+        ]);
+
+        return res.json({ 
+            status: true,
+            users
+        });
+
+    } catch (ex) {
+        next(ex);
+    }
+
+};
