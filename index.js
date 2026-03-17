@@ -17,6 +17,7 @@ app.use(express.json({ limit: '50mb' })); // Để server đọc được dữ l
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/userAvatar", userAvatarRoutes);
+app.use("/api/users", userAvatarRoutes);
 
 // Lấy URL từ biến môi trường
 const MONGODB_URL = process.env.MONGODB_URL;
