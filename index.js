@@ -7,6 +7,7 @@ require("dotenv").config(); // <--- Thêm dòng này để đọc file .env
 
 const authRouter = require("./routes/auth"); // Import auth routes
 const userAvatarRoutes = require("./routes/userAvatarRoutes"); // Import avatar routes
+const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 const server = http.createServer(app); // Tạo server bọc lấy app express
@@ -17,7 +18,8 @@ app.use(express.json({ limit: '50mb' })); // Để server đọc được dữ l
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/userAvatar", userAvatarRoutes);
-app.use("/api/users", userAvatarRoutes);
+app.use("/api/users", userAvatarRoutes); // Cho chức năng tìm kiếm người dùng
+app.use("/api/messages", messageRoutes);
 
 // Lấy URL từ biến môi trường
 const MONGODB_URL = process.env.MONGODB_URL;
