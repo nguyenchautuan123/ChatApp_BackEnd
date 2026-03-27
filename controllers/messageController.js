@@ -1,5 +1,6 @@
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
+const User = require("../models/User");
 
 // Hàm gửi tin nhắn
 module.exports.addMessage = async (req, res, next) => {
@@ -24,6 +25,12 @@ module.exports.addMessage = async (req, res, next) => {
             sender: from,
             text: message,
         });
+
+        // Mẹo nhỏ: Cập nhật lại thời gian 'updatedAt' của phòng chat
+        // Để khi có tin nhắn mới, phòng chat này sẽ được đẩy lên đầu danh sách ở ChatScreen
+        await Conversation.findByIdAndUpdate(
+            conversation._id, { updatedAt: new Date() }
+        );
 
         if(newMessage){
             return res.json({ message: "Tin nhắn đã được gửi.", data: newMessage});
@@ -52,7 +59,7 @@ module.exports.getAllMessage = async (req, res, next) => {
 
         // 2. Lấy toàn bộ tin nhắn thuộc về phòng chat này
         const messages = await Message.find({
-            conversationId: conversation._id,
+            conversation_Id: conversation._id,
         }).sort({ createdAt: 1}); // Sắp xếp theo thời gian cũ -> mới (dùng createdAt)
 
         const projectedMessages = messages.map((msg) => {
@@ -66,5 +73,39 @@ module.exports.getAllMessage = async (req, res, next) => {
         res.json(projectedMessages);
     } catch (ex) {
         next(ex);
+    }
+};
+
+//Hàm lấy danh sách cuộc trò chuyện (getConversation)
+module.exports.getConversations = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+
+        // 1. Tìm tất cả các phòng chat mà có mặt user này
+        const conversations = await Conversation.find({
+            members: { $in: [userId] }
+        }).sort({ updatedAt: -1}); // Sắp xếp: phòng có tin nhắn mới nhất lên đầu (-1)
+
+        // 2. Lấy thông tin chi tiết của từng phòng chat
+        const conversationData = await Promise.all(
+            conversations.map(async (conv) => {
+                const receiverId = conv.members.find((member) => member !== userId);
+
+                const receiver = await User.findById(receiverId).select("username avatarImage");
+
+                const lastMessage = await Message.findOne({ conversation_Id: conv._id}).sort({ createdAt: -1 });
+
+                return {
+                    conversation: conv,
+                    receiver: receiver,
+                    lastMessage: lastMessage ? lastMessage.text : "Chưa có tin nhắn",
+                    updatedAt: conv.updatedAt
+                };
+            })
+        );
+
+        res.json({ status: true, data: conversationData});
+    } catch (ex) {
+        next(ex); 
     }
 };
