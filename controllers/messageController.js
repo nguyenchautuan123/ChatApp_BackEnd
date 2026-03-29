@@ -60,7 +60,7 @@ module.exports.getAllMessage = async (req, res, next) => {
         // 2. Lấy toàn bộ tin nhắn thuộc về phòng chat này
         const messages = await Message.find({
             conversation_Id: conversation._id,
-        }).sort({ createdAt: 1}); // Sắp xếp theo thời gian cũ -> mới (dùng createdAt)
+        }).sort({ createdAt: -1}); // Sắp xếp theo thời gian cũ -> mới (dùng createdAt)
 
         const projectedMessages = messages.map((msg) => {
             return {
